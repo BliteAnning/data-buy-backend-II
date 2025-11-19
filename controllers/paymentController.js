@@ -5,18 +5,18 @@ import { db } from '../Config/firebase.js';
 
 
 export const sendMobileMoney = async (req, res) => {
-    const { uid, amount } = req.body
+    const {account_number, account_name, channel, client_reference, amount } = req.body
 
     try {
 
-        const subRef = db.collection("client_subaccounts").doc(uid);
+        /*const subRef = db.collection("client_subaccounts").doc(uid);
         const subSnap = await subRef.get()
 
         if (!subSnap.exists) {
             return res.status(404).json({ error: "Subaccount not found" });
         }
 
-        const subData = subSnap.data();
+        const subData = subSnap.data();*/
 
 
 
@@ -24,16 +24,23 @@ export const sendMobileMoney = async (req, res) => {
             "https://api.bulkclix.com/api/v1/payment-api/send/mobilemoney",
             {
                 amount: amount,
-                account_number: subData.account_number,
-                channel: subData.bank_code,
-                account_name: subData.account_name,
-                client_reference: subData.subaccount_code
+                account_number: account_number,
+                channel: channel,
+                account_name: account_name,
+                client_reference: client_reference
             },
+            /*{
+                authorization:{
+                    key: x-api-key,
+                    value: process.env.BULKCLIX_API_KEY
+                }
+            },*/
             
             {
                 headers: {
                     Accept: "application/json",
-                    Authorization: `Bearer ${process.env.BULKCLIX_API_KEY}`
+                    "x-api-key": process.env.BULKCLIX_API_KEY
+                   
                 }
             }
         );
