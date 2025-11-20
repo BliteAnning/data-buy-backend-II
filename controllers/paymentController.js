@@ -22,36 +22,24 @@ export const sendMobileMoney = async (req, res) => {
 
 
         const response = await axios.post(
-            "https://api.bulkclix.com/api/v1/payment-api/send/mobilemoney",
-            {
-                amount: amount,
-                account_number: account_number,
-                channel: channel,
-                account_name: account_name,
-                client_reference: client_reference
-            },
-           
-            
-            {
-                headers: {
-                    "Accept": "application/json",
-                    "x-api-key": process.env.BULKCLIX_API_KEY,
-                    "Content-Type": "application/json"
-                   
-                }
-            }
-        );
+      "https://api.bulkclix.com/api/v1/payment-api/send/mobilemoney",
+      {
+        amount: amount,
+        account_number: account_number,
+        channel: channel,
+        account_name: account_name,
+        client_reference: client_reference
+      },
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "x-api-key": process.env.BULKCLIX_API_KEY
+        }
+      }
+    );
 
-       
-     
-        console.log("Response:", response.data);
-        res.json({
-            success: true,
-            data: response.data,
-            message: "withdrawal initiated"
-        });
-        console.log(process.env.BULKCLIX_API_KEY);
-
+    console.log("BulkClix Response:", response.data);
     } catch (error) {
         console.error("Error:", error.response?.data || error.message);
         res.json({
