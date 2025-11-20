@@ -2,6 +2,7 @@ import axios from 'axios'
 import { db } from '../Config/firebase.js';
 
 
+console.log(process.env.BULKCLIX_API_KEY);
 
 console.log("test")
 export const sendMobileMoney = async (req, res) => {
