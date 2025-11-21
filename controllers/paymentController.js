@@ -4,29 +4,29 @@ import { db } from '../Config/firebase.js';
 
 
 export const sendMobileMoney = async (req, res) => {
-    const { account_number, account_name, channel, client_reference, amount } = req.body
+  const { uid, amount } = req.body
 
-    try {
+  try {
 
-        /*const subRef = db.collection("client_subaccounts").doc(uid);
-        const subSnap = await subRef.get()
+    const subRef = db.collection("client_subaccounts").doc(uid);
+    const subSnap = await subRef.get()
 
-        if (!subSnap.exists) {
-            return res.status(404).json({ error: "Subaccount not found" });
-        }
+    if (!subSnap.exists) {
+      return res.status(404).json({ error: "Subaccount not found" });
+    }
 
-        const subData = subSnap.data();*/
+    const subData = subSnap.data();
 
 
 
-        const response = await axios.post(
+    const response = await axios.post(
       "https://api.bulkclix.com/api/v1/payment-api/send/mobilemoney",
       {
         amount: amount,
-        account_number: account_number,
-        channel: channel,
-        account_name: account_name,
-        client_reference: client_reference
+        account_number: subData.account_number,
+        channel: subData.bank_code,
+        account_name: subData.account_name,
+        client_reference: subData.subaccount_code
       },
       {
         headers: {
@@ -37,15 +37,55 @@ export const sendMobileMoney = async (req, res) => {
       }
     );
 
-    console.log("BulkClix Response:", response.data);
-    } catch (error) {
-        console.error("Error:", error.response?.data || error.message);
-        res.json({
-            error: true,
-            message: error.response?.data || error.message,
-            success: false
-        });
+    await db.collection("withdraw").doc(uid).set(
+      {
+        responses: [
+          {
+            response: response.data,
+            timestamp: new Date()
+          }
+        ],
+        updatedAt: new Date()
+      },
+      { merge: true }
+    );
+
+    // If document exists, push to array; if not, create array
+    const withdrawRef = db.collection("withdraw").doc(uid);
+    const withdrawSnap = await withdrawRef.get();
+
+    if (withdrawSnap.exists) {
+      await withdrawRef.update({
+        responses: db.FieldValue.arrayUnion({
+          response: response.data,
+          timestamp: new Date()
+        }),
+        updatedAt: new Date()
+      });
+    } else {
+      await withdrawRef.set({
+        responses: [
+          {
+            response: response.data,
+            timestamp: new Date()
+          }
+        ],
+        updatedAt: new Date()
+      });
     }
+
+
+
+
+    console.log("BulkClix Response:", response.data);
+  } catch (error) {
+    console.error("Error:", error.response?.data || error.message);
+    res.json({
+      error: true,
+      message: error.response?.data || error.message,
+      success: false
+    });
+  }
 }
 
 
