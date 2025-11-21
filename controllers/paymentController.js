@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { db } from '../Config/firebase.js';
+import admin from 'firebase-admin';
 
 
 
@@ -55,9 +56,11 @@ export const sendMobileMoney = async (req, res) => {
     const withdrawRef = db.collection("withdraw").doc(uid);
     const withdrawSnap = await withdrawRef.get();
 
+
+
     if (withdrawSnap.exists) {
       await withdrawRef.update({
-        responses: db.FieldValue.arrayUnion({
+        responses: admin.firestore.FieldValue.arrayUnion({
           response: response.data,
           timestamp: new Date()
         }),
