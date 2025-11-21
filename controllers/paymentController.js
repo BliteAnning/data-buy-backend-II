@@ -8,8 +8,10 @@ export const sendMobileMoney = async (req, res) => {
 
   try {
 
-    const subRef = db.collection("client-subaccount").doc(uid);
-    const subSnap = await subRef.get()
+    const subSnap = db.collection("client-subaccount")
+    .where("uid", "==", uid)
+    .get();
+    
 
     if (!subSnap.exists) {
       return res.status(404).json({ error: "Subaccount not found" });
