@@ -5,7 +5,7 @@ import admin from 'firebase-admin';
 
 
 export const sendMobileMoney = async (req, res) => {
-  const { uid, amount } = req.body
+  const { uid, amount, client_reference } = req.body
 
   try {
 
@@ -28,7 +28,7 @@ export const sendMobileMoney = async (req, res) => {
         account_number: subData.account_number,
         channel: subData.bank_code,
         account_name: subData.account_name,
-        client_reference: subData.subaccount_code
+        client_reference: client_reference
       },
       {
         headers: {
