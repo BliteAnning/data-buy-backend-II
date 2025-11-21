@@ -8,21 +8,17 @@ export const sendMobileMoney = async (req, res) => {
 
   try {
 
-    const subSnap = db
-    .collection("client-subaccount")
-    .where("uid", "==", uid)
-    .get();
-    
-    
+    const subSnap = await db
+      .collection("client-subaccount")
+      .where("uid", "==", uid)
+      .get();
+
     if (subSnap.empty) {
       return res.status(404).json({ error: "uid not found" });
     }
 
-   
-
-    const subData = subSnap.docs[0].data();
-
-
+    const subDoc = subSnap.docs[0];
+    const subData = subDoc.data();
 
     const response = await axios.post(
       "https://api.bulkclix.com/api/v1/payment-api/send/mobilemoney",
