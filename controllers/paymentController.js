@@ -14,7 +14,7 @@ export const sendMobileMoney = async (req, res) => {
     .get();
     
     
-    if (!subSnap.empty) {
+    if (subSnap.empty) {
       return res.status(404).json({ error: "uid not found" });
     }
 
