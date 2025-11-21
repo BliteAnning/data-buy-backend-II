@@ -82,6 +82,11 @@ export const sendMobileMoney = async (req, res) => {
 
 
     console.log("BulkClix Response:", response.data);
+    res.json({
+      success: true,
+      message: "Mobile money sent successfully",
+      data: response.data
+    })
   } catch (error) {
     console.error("Error:", error.response?.data || error.message);
     res.json({
