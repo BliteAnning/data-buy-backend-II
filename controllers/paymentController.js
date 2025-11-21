@@ -8,16 +8,19 @@ export const sendMobileMoney = async (req, res) => {
 
   try {
 
-    const subSnap = db.collection("client-subaccount")
+    const subSnap = db
+    .collection("client-subaccount")
     .where("uid", "==", uid)
     .get();
     
-
-    if (!subSnap.exists) {
-      return res.status(404).json({ error: "Subaccount not found" });
+    
+    if (!subSnap.empty) {
+      return res.status(404).json({ error: "uid not found" });
     }
 
-    const subData = subSnap.data();
+   
+
+    const subData = subSnap.docs[0].data();
 
 
 
