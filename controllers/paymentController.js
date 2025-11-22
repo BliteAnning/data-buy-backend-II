@@ -39,43 +39,30 @@ export const sendMobileMoney = async (req, res) => {
       }
     );
 
-    await db.collection("withdraw").doc(uid).set(
-      {
-        responses: [
-          {
-            response: response.data,
-            timestamp: new Date()
-          }
-        ],
-        updatedAt: new Date()
-      },
-      { merge: true }
-    );
+   
 
     // If document exists, push to array; if not, create array
     const withdrawRef = db.collection("withdraw").doc(uid);
     const withdrawSnap = await withdrawRef.get();
 
-
+    const withdrawalEntry = {
+      response: response.data,   
+      timestamp: new Date()
+    };
 
     if (withdrawSnap.exists) {
+      
       await withdrawRef.update({
-        responses: admin.firestore.FieldValue.arrayUnion({
-          response: response.data,
-          timestamp: new Date()
-        }),
+        responses: admin.firestore.FieldValue.arrayUnion(withdrawalEntry)
       });
+
     } else {
+      
       await withdrawRef.set({
-        responses: [
-          {
-            response: response.data,
-            timestamp: new Date()
-          }
-        ],
-        updatedAt: new Date()
+        responses: [withdrawalEntry]
       });
     }
+
 
     //update totalWithdrawals in client-subaccount
 
