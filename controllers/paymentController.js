@@ -64,7 +64,6 @@ export const sendMobileMoney = async (req, res) => {
           response: response.data,
           timestamp: new Date()
         }),
-        updatedAt: new Date()
       });
     } else {
       await withdrawRef.set({
@@ -84,7 +83,7 @@ export const sendMobileMoney = async (req, res) => {
 
     // default to 0 if undefined
     const prevWithdrawn = Number(subData.totalMoneyWithdrawn || 0);
-    const prevReceived = Number(subData.totalAmountReceived || 0);
+    const prevReceived = Number(subData.totalMoneyReceived || 0);
 
     // compute new values
     const updatedWithdrawn = prevWithdrawn + amountNum;
@@ -93,7 +92,7 @@ export const sendMobileMoney = async (req, res) => {
     // update Firestore
     await subDoc.ref.update({
       totalMoneyWithdrawn: updatedWithdrawn,
-      totalAmountReceived: updatedReceived,
+      totalMoneyReceived: updatedReceived,
       updatedAt: new Date()
     });
 
