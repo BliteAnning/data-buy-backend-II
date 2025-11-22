@@ -79,9 +79,11 @@ export const sendMobileMoney = async (req, res) => {
     }
 
     //update totalWithdrawals in client-subaccount
-    const totalWithdrawals = (subData.totalWithdrawals || 0) + amount;
-    await subDoc.ref.update({ totalWithdrawals });
-    
+
+    const amountwithdrawn = (subData.totalMoneyWithdrawn || 0) + amount;
+    const amountLeft = (subData.totalMoneyRecieved || 0) + amount;
+    await subDoc.ref.update({ totalMoneyWithdrawn:amountwithdrawn, totalMoneyRecieved: amountLeft });
+
 
 
 
