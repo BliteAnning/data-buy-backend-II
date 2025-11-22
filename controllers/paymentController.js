@@ -80,9 +80,22 @@ export const sendMobileMoney = async (req, res) => {
 
     //update totalWithdrawals in client-subaccount
 
-    const amountwithdrawn = (subData.totalMoneyWithdrawn || 0) + amount;
-    const amountLeft = (subData.totalMoneyRecieved || 0) + amount;
-    await subDoc.ref.update({ totalMoneyWithdrawn:amountwithdrawn, totalMoneyRecieved: amountLeft });
+    const amountNum = Number(amount);
+
+    // default to 0 if undefined
+    const prevWithdrawn = Number(subData.totalMoneyWithdrawn || 0);
+    const prevReceived = Number(subData.totalAmountReceived || 0);
+
+    // compute new values
+    const updatedWithdrawn = prevWithdrawn + amountNum;
+    const updatedReceived = prevReceived - amountNum;
+
+    // update Firestore
+    await subDoc.ref.update({
+      totalMoneyWithdrawn: updatedWithdrawn,
+      totalAmountReceived: updatedReceived,
+      updatedAt: new Date()
+    });
 
 
 
