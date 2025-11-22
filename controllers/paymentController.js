@@ -39,28 +39,22 @@ export const sendMobileMoney = async (req, res) => {
       }
     );
 
-   
 
-    // If document exists, push to array; if not, create array
-    const withdrawRef = db.collection("withdraw").doc(uid);
-    const withdrawSnap = await withdrawRef.get();
 
-    const withdrawalEntry = {
-      response: response.data,   
-      timestamp: new Date()
-    };
-
-    if (withdrawSnap.exists) {
-      
-      await withdrawRef.update({
-        responses: admin.firestore.FieldValue.arrayUnion(withdrawalEntry)
+    // store in database
+    try {
+      await db.collection('withdraw').add({
+        uid: uid,
+        amount: amount,
+        account_number: response.data.account_number,
+        transaction_id: response.data.transaction_id,
+        client_reference: response.data.client_reference,
+        message: response.data.message,
+        createdAt:new Date(),
+        status:"sent"
       });
-
-    } else {
-      
-      await withdrawRef.set({
-        responses: [withdrawalEntry]
-      });
+    } catch (err) {
+      console.error("Error saving payment to Firestore:", err);
     }
 
 
@@ -68,18 +62,18 @@ export const sendMobileMoney = async (req, res) => {
 
     const amountNum = Number(amount);
 
-    // default to 0 if undefined
+   
     const prevWithdrawn = Number(subData.totalMoneyWithdrawn || 0);
-    const prevReceived = Number(subData.totalMoneyReceived || 0);
+   // const prevReceived = Number(subData.totalMoneyReceived || 0);
 
-    // compute new values
+    
     const updatedWithdrawn = prevWithdrawn + amountNum;
-    const updatedReceived = prevReceived - amountNum;
+    //const updatedReceived = prevReceived - amountNum;
 
-    // update Firestore
+   
     await subDoc.ref.update({
       totalMoneyWithdrawn: updatedWithdrawn,
-      totalMoneyReceived: updatedReceived,
+     // totalMoneyReceived: updatedReceived,
       updatedAt: new Date()
     });
 
