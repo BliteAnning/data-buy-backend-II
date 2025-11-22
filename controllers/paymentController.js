@@ -46,9 +46,9 @@ export const sendMobileMoney = async (req, res) => {
       await db.collection('withdraw').add({
         uid: uid,
         amount: amount,
-        account_number: response.data.account_number,
-        transaction_id: response.data.transaction_id,
-        client_reference: response.data.client_reference,
+        account_number: response.data.data.account_number,
+        transaction_id: response.data.data.transaction_id,
+        client_reference: response.data.data.client_reference,
         message: response.data.message,
         createdAt:new Date(),
         status:"sent"
