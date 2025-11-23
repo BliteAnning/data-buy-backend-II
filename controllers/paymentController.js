@@ -19,9 +19,17 @@ export const sendMobileMoney = async (req, res) => {
     if (subSnap.empty) {
       return res.status(404).json({ error: "uid not found" });
     }
+ 
 
     const subDoc = subSnap.docs[0];
     const subData = subDoc.data();
+
+    const currentBalance = subData.totalMoneyReceived - subData.totalMoneyWithdrawn
+
+    if(amount > currentBalance){
+      return res.status(404).json({error:"enter amount less than or equal to your current balance"})
+    }
+
 
     const response = await axios.post(
       "https://api.bulkclix.com/api/v1/payment-api/send/mobilemoney",
