@@ -5,7 +5,9 @@ import admin from 'firebase-admin';
 
 
 export const sendMobileMoney = async (req, res) => {
-  const { uid, amount, client_reference } = req.body
+  const { uid, amount, client_reference,momo_number, network } = req.body
+
+  const newAmount = amount - (0.01*amount)
 
   try {
 
@@ -24,9 +26,9 @@ export const sendMobileMoney = async (req, res) => {
     const response = await axios.post(
       "https://api.bulkclix.com/api/v1/payment-api/send/mobilemoney",
       {
-        amount: amount,
-        account_number: subData.account_number,
-        channel: subData.bank_code,
+        amount: newAmount,
+        account_number: momo_number,
+        channel: network,
         account_name: subData.account_name,
         client_reference: client_reference
       },
