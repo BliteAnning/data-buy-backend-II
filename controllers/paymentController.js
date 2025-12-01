@@ -5,7 +5,7 @@ import admin from 'firebase-admin';
 
 
 export const sendMobileMoney = async (req, res) => {
-  const { uid, amount, client_reference,momo_number, network } = req.body
+  const { uid, amount, client_reference,momo_number, network, business_name } = req.body
 
   const newAmount = amount - (0.01*amount)
 
@@ -60,6 +60,7 @@ export const sendMobileMoney = async (req, res) => {
         transaction_id: response.data.data.transaction_id,
         client_reference: response.data.data.client_reference,
         message: response.data.message,
+        business_name,
         createdAt:new Date(),
         status:"sent"
       });
