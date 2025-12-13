@@ -16,7 +16,7 @@ export const sendMobileMoney = async (req, res) => {
       .from('client-subaccount')
       .select('*')
       .eq('uid', uid)
-      .limit(1);
+      .single();
 
     if (subError || !subaccount) {
       return res.status(404).json({ error: "uid not found" });
