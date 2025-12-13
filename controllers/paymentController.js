@@ -15,7 +15,7 @@ export const sendMobileMoney = async (req, res) => {
     const { data: subaccount, error: subError } = await supabase
       .from('client-subaccount')
       .select('*')
-      .eq('uid', uid)
+      .eq('id', uid)
       .single();
 
     if (subError || !subaccount) {
