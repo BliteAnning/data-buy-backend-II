@@ -1,6 +1,5 @@
 import axios from 'axios'
-import { db } from '../Config/firebase.js';
-import admin from 'firebase-admin';
+import supabase from '../Config/supabase.js';
 
 
 
@@ -11,18 +10,19 @@ export const sendMobileMoney = async (req, res) => {
 
   try {
 
-    const subSnap = await db
-      .collection("client-subaccount")
-      .where("uid", "==", uid)
-      .get();
 
-    if (subSnap.empty) {
+    // Fetch subaccount by uid from Supabase
+    const { data: subaccount, error: subError } = await supabase
+      .from('client-subaccount')
+      .select('*')
+      .eq('uid', uid)
+      .limit(1);
+
+    if (subError || !subaccount) {
       return res.status(404).json({ error: "uid not found" });
     }
- 
 
-    const subDoc = subSnap.docs[0];
-    const subData = subDoc.data();
+    const subData = subaccount;
 
     const currentBalance = subData.totalMoneyReceived - subData.totalMoneyWithdrawn
 
@@ -51,42 +51,41 @@ export const sendMobileMoney = async (req, res) => {
 
 
 
-    // store in database
-    try {
-      await db.collection('withdraw').add({
-        uid: uid,
-        amount: amount,
-        account_number: response.data.data.account_number,
-        transaction_id: response.data.data.transaction_id,
-        client_reference: response.data.data.client_reference,
-        message: response.data.message,
-        business_name,
-        createdAt:new Date(),
-        status:"sent"
-      });
-    } catch (err) {
-      console.error("Error saving payment to Firestore:", err);
+    // store in Supabase
+    const { error: withdrawError } = await supabase
+      .from('withdrawals')
+      .insert([
+        {
+          uid: uid,
+          amount: amount,
+          account_number: response.data.data.account_number,
+          transaction_id: response.data.data.transaction_id,
+          client_reference: response.data.data.client_reference,
+          message: response.data.message,
+          business_name,
+          created_at: new Date().toISOString(),
+          status: "sent"
+        }
+      ]);
+    if (withdrawError) {
+      console.error("Error saving payment to Supabase:", withdrawError);
     }
 
 
-    //update totalWithdrawals in client-subaccount
-
+    // update totalWithdrawals in client_subaccount (Supabase)
     const amountNum = Number(amount);
-
-   
     const prevWithdrawn = Number(subData.totalMoneyWithdrawn || 0);
-   // const prevReceived = Number(subData.totalMoneyReceived || 0);
-
-    
     const updatedWithdrawn = prevWithdrawn + amountNum;
-    //const updatedReceived = prevReceived - amountNum;
-
-   
-    await subDoc.ref.update({
-      totalMoneyWithdrawn: updatedWithdrawn,
-     // totalMoneyReceived: updatedReceived,
-      updatedAt: new Date()
-    });
+    const { error: updateError } = await supabase
+      .from('client-subaccount')
+      .update({
+        totalMoneyWithdrawn: updatedWithdrawn,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', subData.id);
+    if (updateError) {
+      console.error("Error updating client_subaccount in Supabase:", updateError);
+    }
 
 
 
